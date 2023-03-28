@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <script src=""https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js""></script>
+<style>
+#customers {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#customers td, #customers th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#customers tr:nth-child(even){background-color: #f2f2f2;}
+
+#customers tr:hover {background-color: #ddd;}
+
+#customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04AA6D;
+  color: white;
+}
+</style>
+
+<style>
+    input[type=text], button, select {
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    input[type=submit], button {
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    input[type=submit]:hover {
+      background-color: #45a049;
+    }
+    
+    div {
+      border-radius: 5px;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    </style>
+</head>
+<body>
+
+
+
+    <div>
+      <form method="POST">
+        {% csrf_token %}
+        <label for="fname">Company</label>
+        <input type="text" id="company" name="company" placeholder="Enter Company Name">
+    
+        <label for="lname">Contact</label>
+        <input type="text" id="contact" name="contact" placeholder="Enter Contact Name">
+    
+        <label for="country">Country</label>
+        <input type="text" id="country" name="country" placeholder="Enter Country Name">
+
+        <button type="button" onclick="add_row()">Create</button>
+      
+      </form>
+    </div>
+    
+
+<h1>A Fancy Table</h1>
+
+<table id="customers">
+<thead>
+  <tr>
+    <th>Company</th>
+    <th>Contact</th>
+    <th>Country</th>
+    <th>Action</th>
+  </tr>
+</thead>>
+
+<tbody id="tttbody">
+  {% for i in all_entries %}
+  <tr>
+    <td>{{i.company}}</td>
+    <td>{{i.contact}}</td>
+    <td>{{i.country}}</td>
+    <td><button onclick="d_row({{i.id}})">Delete</button></td>
+
+  </tr>
+  {% endfor %}
+  </tbody>
+
+</table>
+
+<script>
+  function add_row(){
+
+    let d1 = {
+      company : $("#company").val(),
+      contact : $("#contact").val(),
+      country : $("#country").val(),
+      csrfmiddlewaretoken :$('input[name="csrfmiddlewaretoken"]').val()
+    }
+
+  
+    $.ajax({
+      data :  d1,
+      method : 'POST',
+      url : '{% url "create_row" %}',
+      success : function(response){
+        alert(response.msg)
+      let x = response.updated_data
+
+      let s = ''
+      for(i=0; i<x.length; i++){
+        s += `<tr>
+              <td>${x[i].company}</td>
+              <td>${x[i].contact}</td>
+              <td>${x[i].country}</td>
+              <td><button onclick="d_row(${x[i].id})">Delete</button></td>
+            </tr>`
+      }
+      $("#tttbody").html(s)
+      }
+    })
+
+  }
+
+function d_row(rid){
+
+  let d1 = {
+      pk : rid,
+      csrfmiddlewaretoken : $('input[name="csrfmiddlewaretoken"]').val()
+  }
+  $.ajax({
+    data : d1,
+    method : 'POST',
+    url : "{% url 'del_row' %}",
+    success : function(response){
+      alert(response.msg)
+      let x = response.updated_data
+
+      let s =  ''
+      for(i = 0; i < x.length; i++){
+        s += `<tr>
+              <td>${x[i].company}</td>
+              <td>${x[i].contact}</td>
+              <td>${x[i].country}</td>
+              <td><button onclick="d_row(${x[i].id})">Delete</button></td>
+            </tr>`
+
+      }
+      $("#tttbody").html(s)
+    }
+  })
+
+
+}
+
+
+</script>
+</body>
+</html>
